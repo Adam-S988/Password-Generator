@@ -1,0 +1,18 @@
+{
+  "name": "qap1",
+  "version": "1.0.0",
+  "description": "This is the first QAP for Fullstack.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "pass-gen": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "fullstackqap1"
+  },
+  "author": "Adam Stevenson",
+  "license": "MIT"
+}
