@@ -4,6 +4,7 @@ const process = require("node:process");
 
 let passwordLength = 8;
 let allowNumbers = false;
+let allowUppercase = false;
 
 function printOpenMessage() {
   console.log(`
@@ -18,14 +19,10 @@ function printHelpMessage() {
     Help for Password Generator:
       - The password length is set to 8 characters by default.
       - Type '--create' or '-c' to generate a password of the specified length.
-      - Type '--length' or '-l' followed by a space and an integer to change the password length (5-10).
+      - Type '--length' or '-l' followed by an integer to change the password length (5-10).
       - Type '--num' or '-n' to allow integers in the password.
-
-      Example: "-c -l 9 -n" will create a password 9 characters in length, including integers.
-
+      - Type '--maj' or '-m' to allow uppercase letters in the password.
       !!Do not share your password with anyone!!
-
-
     `);
 }
 
@@ -54,9 +51,12 @@ function printPasswordErrorMessage(length) {
 }
 
 function generatePassword(length) {
-  const charset = allowNumbers
-    ? "abcdefghijklmnopqrstuvwxyz0123456789"
-    : "abcdefghijklmnopqrstuvwxyz";
+  const lowercaseCharset = "abcdefghijklmnopqrstuvwxyz";
+  const uppercaseCharset = allowUppercase ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "";
+  const numberCharset = allowNumbers ? "0123456789" : "";
+
+  const charset = lowercaseCharset + uppercaseCharset + numberCharset;
+
   let password = "";
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * charset.length);
@@ -68,7 +68,12 @@ function generatePassword(length) {
 function validatePassword(password) {
   const hasLetter = /[a-zA-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  return hasLetter && (allowNumbers ? true : !hasNumber);
+  const hasUppercase = /[A-Z]/.test(password);
+  return (
+    hasLetter &&
+    (allowNumbers ? true : !hasNumber) &&
+    (allowUppercase ? hasUppercase : true)
+  );
 }
 
 const userArguments = process.argv.slice(2);
@@ -99,19 +104,32 @@ const createArgIndex =
     ? userArguments.indexOf("--create")
     : userArguments.indexOf("-c");
 
-//Allow Integers
 const numArgIndex =
   userArguments.indexOf("--num") !== -1
     ? userArguments.indexOf("--num")
     : userArguments.indexOf("-n");
+
+const majArgIndex =
+  userArguments.indexOf("--maj") !== -1
+    ? userArguments.indexOf("--maj")
+    : userArguments.indexOf("-m");
 
 if (numArgIndex !== -1) {
   if (createArgIndex === -1) {
     printMissingCreateArgumentMessage();
     return;
   }
-  allowNumbers = true;
-  console.log("    Numbers are allowed in the password.");
+  allowNumbers = true; // Set the flag to allow numbers
+  console.log("Numbers are allowed in the password.");
+}
+
+if (majArgIndex !== -1) {
+  if (createArgIndex === -1) {
+    printMissingCreateArgumentMessage();
+    return;
+  }
+  allowUppercase = true; // Set the flag to allow uppercase letters
+  console.log("Uppercase letters are allowed in the password.");
 }
 
 if (createArgIndex !== -1) {
@@ -130,8 +148,6 @@ if (createArgIndex !== -1) {
   }
 
   console.log(`
-------------------------------
-
 Generated password: ${password}
   `);
   return;
