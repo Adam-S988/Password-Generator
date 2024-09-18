@@ -3,6 +3,7 @@
 const process = require("node:process");
 
 let passwordLength = 8;
+let allowNumbers = false;
 
 function printOpenMessage() {
   console.log(`
@@ -16,11 +17,15 @@ function printHelpMessage() {
   console.log(`
     Help for Password Generator:
       - The password length is set to 8 characters by default.
-      - Type '--length' or '-l' followed by an integer to set the password length (5-10).
       - Type '--create' or '-c' to generate a password of the specified length.
-      - Password length must be between 5 and 10 characters if length is specified.
-      - Password must contain at least 1 letter (A-Z) and 1 number (0-9).
-      - Do not share your password with anyone.
+      - Type '--length' or '-l' followed by a space and an integer to change the password length (5-10).
+      - Type '--num' or '-n' to allow integers in the password.
+
+      Example: "-c -l 9 -n" will create a password 9 characters in length, including integers.
+
+      !!Do not share your password with anyone!!
+
+
     `);
 }
 
@@ -48,36 +53,22 @@ function printPasswordErrorMessage(length) {
     `);
 }
 
-function generateBaseRandomPassword(length) {
-  const charset = "abcdefghijklmnopqrstuvwxyz";
+function generatePassword(length) {
+  const charset = allowNumbers
+    ? "abcdefghijklmnopqrstuvwxyz0123456789"
+    : "abcdefghijklmnopqrstuvwxyz";
   let password = "";
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * charset.length);
     password += charset[randomIndex];
   }
   return password;
-}
-
-function generateRandomPassword(length) {
-  const charset =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>?/";
-  let password = "";
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
-    password += charset[randomIndex];
-  }
-  return password;
-}
-
-function validateBasePassword(password) {
-  const hasLetter = /[a-z]/.test(password);
-  return hasLetter;
 }
 
 function validatePassword(password) {
   const hasLetter = /[a-zA-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  return hasLetter && hasNumber;
+  return hasLetter && (allowNumbers ? true : !hasNumber);
 }
 
 const userArguments = process.argv.slice(2);
@@ -108,15 +99,30 @@ const createArgIndex =
     ? userArguments.indexOf("--create")
     : userArguments.indexOf("-c");
 
+//Allow Integers
+const numArgIndex =
+  userArguments.indexOf("--num") !== -1
+    ? userArguments.indexOf("--num")
+    : userArguments.indexOf("-n");
+
+if (numArgIndex !== -1) {
+  if (createArgIndex === -1) {
+    printMissingCreateArgumentMessage();
+    return;
+  }
+  allowNumbers = true;
+  console.log("    Numbers are allowed in the password.");
+}
+
 if (createArgIndex !== -1) {
-  const password = generateBaseRandomPassword(passwordLength);
+  const password = generatePassword(passwordLength);
 
   if (password.length !== passwordLength) {
     printPasswordErrorMessage(passwordLength);
     return;
   }
 
-  if (!validateBasePassword(password)) {
+  if (!validatePassword(password)) {
     console.log(
       `ERROR: Generated password does not meet complexity requirements.`
     );
@@ -124,13 +130,10 @@ if (createArgIndex !== -1) {
   }
 
   console.log(`
+------------------------------
+
 Generated password: ${password}
   `);
-  return;
-}
-
-if (lengthArgIndex !== -1 && createArgIndex === -1) {
-  printMissingCreateArgumentMessage();
   return;
 }
 
