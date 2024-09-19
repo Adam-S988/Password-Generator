@@ -22,12 +22,14 @@ function printOpenMessage() {
 function printHelpMessage() {
   console.log(`
     Help for Password Generator:
-      - The password length is set to 8 characters by default.
-      - Type '--create' or '-c' to generate a password of the specified length.
-      - Type '--length' or '-l' followed by an integer to change the password length (5-10).
-      - Type '--num' or '-n' to allow integers in the password.
-      - Type '--maj' or '-m' to allow uppercase letters in the password.
-      - Type '--symbol' or '-s' to allow for symbols in the password.
+      --create, -c to generate a password
+      --length, -l followed by an integer to change the password length (8-12) [Default: 8]
+      --num, -n to allow integers in the password
+      --maj, -m to allow uppercase letters in the password
+      --symbol, -s to allow for symbols in the password
+
+      Example "-c -n -m -l 9" will create a 9-character long password with numbers and upper case
+
       !!Do not share your password with anyone!!
   `);
 }
@@ -35,7 +37,7 @@ function printHelpMessage() {
 // Error if the password character length falls outside of the valid range
 function printLengthMessage() {
   console.log(`
-    ERROR: Password length must be between 5 and 10 characters.
+    ERROR: Password length must be between 8 and 12 characters.
   `);
 }
 
@@ -109,9 +111,10 @@ const lengthArgIndex =
     ? userArguments.indexOf("--length")
     : userArguments.indexOf("-l");
 
+//Define the valid range of password length
 if (lengthArgIndex !== -1 && lengthArgIndex + 1 < userArguments.length) {
   const lengthValue = parseInt(userArguments[lengthArgIndex + 1], 10);
-  if (lengthValue >= 5 && lengthValue <= 10) {
+  if (lengthValue >= 8 && lengthValue <= 12) {
     passwordLength = lengthValue;
     printPasswordLengthSetMessage(passwordLength);
   } else {
