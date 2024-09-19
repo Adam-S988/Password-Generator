@@ -1,5 +1,5 @@
 {
-  "name": "qap1",
+  "name": "qap1-password_generator",
   "version": "1.0.0",
   "description": "This is the first QAP for Fullstack.",
   "main": "index.js",
